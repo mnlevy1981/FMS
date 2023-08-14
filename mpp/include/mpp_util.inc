@@ -40,15 +40,32 @@
 
   !> @brief This function returns the current  standard fortran unit numbers for output.
   function stdout()
+#ifdef CESMCOUPLED
+    use shr_log_mod, only : shr_log_getLogUnit
+    integer :: stdout
+    call shr_log_getLogUnit(stdout)
+    ! hardcoded 1024 should be same as _MAX_FILE_UNITS 
+    if(stdout < -1024 ) then
+       call mpp_error(FATAL,'=>mpp_util.inc: ATTEMPT TO SET stdout to a unit outside of allowed range')
+    endif
+
+    out_unit = stdout
+    return
+#else
     integer :: stdout
     stdout = out_unit
     if( pe.NE.root_pe )stdout = stdlog()
     return
+#endif
   end function stdout
 
   !> @brief This function returns the current standard fortran unit numbers for error messages.
   function stderr()
     integer :: stderr
+#ifdef CESMCOUPLED
+    stderr = stdout()
+    return
+#endif
     stderr = err_unit
     return
   end function stderr

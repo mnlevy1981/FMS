@@ -1087,11 +1087,11 @@
 
     !print out decomposition, this didn't consider maskmap.
     if( mpp_pe() .EQ. pes(0) .AND. PRESENT(name) )then
-       write(*,*) trim(name)//' domain decomposition'
-       write(*,'(a,i4,a,i4,a,i4,a,i4)')'whalo = ', whalosz, ", ehalo = ", ehalosz, ", shalo = ", shalosz, &
+       write(outunit,*) trim(name)//' domain decomposition'
+       write(outunit,'(a,i4,a,i4,a,i4,a,i4)')'whalo = ', whalosz, ", ehalo = ", ehalosz, ", shalo = ", shalosz, &
                                      & ", nhalo = ", nhalosz
-       write (*,110) (domain%x(1)%list(i)%compute%size, i= 0, layout(1)-1)
-       write (*,120) (domain%y(1)%list(i)%compute%size, i= 0, layout(2)-1)
+       write (outunit,110) (domain%x(1)%list(i)%compute%size, i= 0, layout(1)-1)
+       write (outunit,120) (domain%y(1)%list(i)%compute%size, i= 0, layout(2)-1)
 110    format ('  X-AXIS = ',24i4,/,(11x,24i4))
 120    format ('  Y-AXIS = ',24i4,/,(11x,24i4))
     endif
