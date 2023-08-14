@@ -49,7 +49,7 @@ use,intrinsic :: iso_c_binding, only: c_double,c_float,c_int64_t, &
        & mix_snapshot_average_fields, global_descriptor, CMOR_MISSING_VALUE, use_cmor, pack_size,&
        & debug_diag_manager, flush_nc_files, output_field_type, max_field_attributes, max_file_attributes,&
        & file_type, prepend_date, region_out_use_alt_value, GLO_REG_VAL, GLO_REG_VAL_ALT,&
-       & DIAG_FIELD_NOT_FOUND, diag_init_time
+       & DIAG_FIELD_NOT_FOUND, diag_init_time, diag_atttype
   USE diag_data_mod, ONLY: fileobjU, fileobj, fnum_for_domain, fileobjND
   USE diag_axis_mod, ONLY: get_diag_axis_data, get_axis_global_length, get_diag_axis_cart,&
        & get_domain1d, get_domain2d, diag_subaxes_init, diag_axis_init, get_diag_axis, get_axis_aux,&
@@ -68,6 +68,10 @@ use,intrinsic :: iso_c_binding, only: c_double,c_float,c_int64_t, &
   USE time_manager_mod,ONLY: time_type, OPERATOR(==), OPERATOR(>), NO_CALENDAR, increment_date,&
        & increment_time, get_calendar_type, get_date, get_time, leap_year, OPERATOR(-),&
        & OPERATOR(<), OPERATOR(>=), OPERATOR(<=), OPERATOR(==)
+  USE time_manager_mod,ONLY: time_type, OPERATOR(==), OPERATOR(>), NO_CALENDAR, increment_date,&
+       & increment_time, get_calendar_type, valid_calendar_types, get_date, get_time, leap_year,&
+       & OPERATOR(-), OPERATOR(<), OPERATOR(>=), OPERATOR(<=), OPERATOR(==)
+  USE time_manager_mod, ONLY: get_calendar_type
   USE mpp_mod, ONLY: mpp_npes
   USE constants_mod, ONLY: SECONDS_PER_DAY, SECONDS_PER_HOUR, SECONDS_PER_MINUTE
   USE fms2_io_mod
@@ -1230,8 +1234,8 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     files(num_files)%time_axis_id = diag_axis_init (TRIM(long_name), tdata, time_units_str, 'T',&
          & TRIM(long_name) , set_name=TRIM(name) )
     !---- register axis for storing time boundaries
-    files(num_files)%time_bounds_id = diag_axis_init( 'nv',(/1.,2./),'none','N','vertex number',&
-         & set_name='nv')
+    files(num_files)%time_bounds_id = diag_axis_init( 'nbnd',(/1.,2./),'none','N','bounds',&
+         & set_name='nbnd')
   END SUBROUTINE init_file
 
   !> @brief Synchronize the file's start and close times with the model start and end times.
@@ -1733,6 +1737,9 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     INTEGER :: is, ie, last, ind
     class(FmsNetcdfFile_t), pointer    :: fileob
     integer :: actual_num_axes !< The actual number of axes to write including time
+    INTEGER :: calendar
+    INTEGER :: time_bounds_num_attributes
+    TYPE(diag_atttype), allocatable :: time_bounds_attributes(:)
 
     aux_present = .FALSE.
     match_aux_name = .FALSE.
@@ -2089,10 +2096,18 @@ END SUBROUTINE check_bounds_are_exact_dynamic
             & cart_name, dir, edges, Domain, domainU, DATA)
        CALL get_diag_axis( time_bounds_id(1), timeb_name, timeb_units, timeb_longname,&
             & cart_name, dir, edges, Domain, domainU, DATA)
+       calendar = get_calendar_type()
+       time_bounds_num_attributes = 1
+       allocate(time_bounds_attributes(1))
+       time_bounds_attributes(1)%type = NF90_CHAR
+       time_bounds_attributes(1)%len = len_trim(valid_calendar_types(calendar)) 
+       time_bounds_attributes(1)%name = 'calendar'
+       time_bounds_attributes(1)%catt = lowercase(TRIM(valid_calendar_types(calendar)))
        ! CF Compliance requires the unit on the _bnds axis is the same as 'time'
        files(file)%f_bounds =  write_field_meta_data(files(file)%file_unit,&
-            & TRIM(time_name)//'_bnds', (/time_bounds_id,time_axis_id/),&
-            & time_units, TRIM(time_name)//' axis boundaries', pack=pack_size , &
+            & TRIM(time_name)//'_bounds', (/time_bounds_id,time_axis_id/),&
+            & time_units, TRIM(time_name)//' interval endpoints', pack=pack_size , &
+            & attributes=time_bounds_attributes, num_attributes=time_bounds_num_attributes, &
             & fileob=fileob)
     END IF
     ! Let lower levels know that all meta data has been sent
@@ -2157,7 +2172,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     CHARACTER(len=20) :: sc !< string of current time (output)
     CHARACTER(len=128) :: filetail
 
-    format = '("_",i*.*)'
+    format = '("-",i*.*)'
     CALL get_date(current_time, yr1, mo1, dy1, hr1, mi1, sc1)
     len = LEN_TRIM(filename)
     first_percent = INDEX(filename, '%')
@@ -2260,6 +2275,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
        sc = ' '
     ENDIF
     get_time_string = TRIM(yr)//TRIM(mo)//TRIM(dy)//TRIM(hr)//TRIM(mi)//TRIM(sc)
+    IF ( LEN_TRIM(get_time_string) > 0 ) get_time_string(1:1) = '.'
   END FUNCTION get_time_string
 
   !> @brief Return the difference between two times in units.

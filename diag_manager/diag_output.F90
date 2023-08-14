@@ -375,15 +375,12 @@ CONTAINS
           calendar = get_calendar_type()
 
 
-          call register_variable_attribute(fileob, axis_name, "calendar_type", &
-                                    UPPERCASE(TRIM(valid_calendar_types(calendar))), &
-                                  & str_len=len_trim(valid_calendar_types(calendar)) )
           call register_variable_attribute(fileob, axis_name, "calendar", &
                                     lowercase(TRIM(valid_calendar_types(calendar))), &
                                   & str_len=len_trim(valid_calendar_types(calendar)) )
           IF ( time_ops1 ) THEN
-             call register_variable_attribute(fileob, axis_name, 'bounds', TRIM(axis_name)//'_bnds', &
-                                             & str_len=len_trim(TRIM(axis_name)//'_bnds'))
+             call register_variable_attribute(fileob, axis_name, 'bounds', TRIM(axis_name)//'_bounds', &
+                                             & str_len=len_trim(TRIM(axis_name)//'_bounds'))
           END IF
           call set_fileobj_time_name(fileob, axis_name)
        ELSE
@@ -521,7 +518,7 @@ character(len=128),dimension(size(axes)) :: axis_names
     IF ( file_unit /= current_file_unit ) CALL error_mesg ( 'write_meta_data',  &
          & 'writing meta data out-of-order to different files', FATAL)
 
-    IF (trim(name) .eq. "time_bnds") then
+    IF (trim(name) .eq. "time_bnds" .or. trim(name) .eq. "time_bounds") then
        is_time_bounds = .true.
     ELSE
        is_time_bounds = .false.
