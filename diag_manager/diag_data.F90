@@ -64,7 +64,7 @@ use platform_mod
   PUBLIC
 
   ! Specify storage limits for fixed size tables used for pointers, etc.
-  INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 300 !< Maximum number of fields per file.
+  INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 400 !< Maximum number of fields per file.
   INTEGER, PARAMETER :: DIAG_OTHER = 0
   INTEGER, PARAMETER :: DIAG_OCEAN = 1
   INTEGER, PARAMETER :: DIAG_ALL   = 2
@@ -297,7 +297,7 @@ use platform_mod
   ! <!-- Namelist variables -->
   LOGICAL :: append_pelist_name = .FALSE.
   LOGICAL :: mix_snapshot_average_fields =.FALSE.
-  INTEGER :: max_files = 31 !< Maximum number of output files allowed.  Increase via diag_manager_nml.
+  INTEGER :: max_files = 40 !< Maximum number of output files allowed.  Increase via diag_manager_nml.
   INTEGER :: max_output_fields = 300 !< Maximum number of output fields.  Increase via diag_manager_nml.
   INTEGER :: max_input_fields = 600 !< Maximum number of input fields.  Increase via diag_manager_nml.
   INTEGER :: max_out_per_in_field = 150 !< Maximum number of output_fields per input_field.  Increase
