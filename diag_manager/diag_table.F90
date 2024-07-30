@@ -255,7 +255,8 @@ MODULE diag_table_mod
   USE constants_mod, ONLY: SECONDS_PER_HOUR, SECONDS_PER_MINUTE
 
   USE diag_data_mod, ONLY: global_descriptor, base_time, base_year, base_month, base_day, base_hour, base_minute, &
-                         & base_second, DIAG_OTHER, DIAG_OCEAN, DIAG_ALL, coord_type, append_pelist_name, pelist_name
+       & base_second, DIAG_OTHER, DIAG_OCEAN, DIAG_ALL, coord_type, append_pelist_name, pelist_name, &
+       MAX_NAME_LENGTH, MAX_FILENAME_LENGTH
   USE diag_util_mod, ONLY: init_file, check_duplicate_output_fields, init_input_field, init_output_field
 
   IMPLICIT NONE
@@ -266,7 +267,7 @@ MODULE diag_table_mod
   !> Private type to hold field information for the diag table
   !> @ingroup diag_table_mod
   TYPE field_description_type
-     CHARACTER(len=128) :: module_name, field_name, output_name, file_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: module_name, field_name, output_name, file_name
      CHARACTER(len=50) :: time_sampling
      CHARACTER(len=50) :: time_method
      CHARACTER(len=50) :: spatial_ops
@@ -285,10 +286,10 @@ MODULE diag_table_mod
      INTEGER :: iOutput_freq_units
      INTEGER :: iNew_file_freq_units
      INTEGER :: iFile_duration_units
-     CHARACTER(len=128) :: file_name
+     CHARACTER(len=MAX_FILENAME_LENGTH) :: file_name
      CHARACTER(len=10) :: output_freq_units
      CHARACTER(len=10) :: time_units
-     CHARACTER(len=128) :: long_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: long_name
      CHARACTER(len=10) :: new_file_freq_units
      CHARACTER(len=25) :: start_time_s
      CHARACTER(len=10) :: file_duration_units
@@ -323,7 +324,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg !< Error message corresponding to the
                                                        !! <TT>istat</TT> return value.
 
-    INTEGER, PARAMETER :: DT_LINE_LENGTH = 256
+    INTEGER, PARAMETER :: DT_LINE_LENGTH = MAX_FILENAME_LENGTH
 
     INTEGER :: stdlog_unit !< Fortran file unit number for the stdlog file.
     INTEGER :: record_len !< String length of the diag_table line read in.
@@ -804,7 +805,7 @@ CONTAINS
 
   !> @brief Fixes the file name for use with diagnostic file and field initializations.
   !! @return Character(len=128) fix_file_name
-  PURE CHARACTER(len=128) FUNCTION fix_file_name(file_name_string)
+  PURE CHARACTER(len=MAX_FILENAME_LENGTH) FUNCTION fix_file_name(file_name_string)
     CHARACTER(len=*), INTENT(IN) :: file_name_string !< String containing the file name from the <TT>diag_table</TT>.
 
     INTEGER :: file_name_len
