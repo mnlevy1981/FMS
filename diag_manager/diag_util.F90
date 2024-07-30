@@ -1752,7 +1752,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
 11  FORMAT(A, ' since ', I4.4, '-', I2.2, '-', I2.2, ' ', I2.2, ':', I2.2, ':', I2.2)
     base_name = files(file)%name
     IF ( files(file)%new_file_freq < VERY_LARGE_FILE_FREQ ) THEN
-       position = INDEX(files(file)%name, '%')
+       position = find_first_fms_percent(files(file)%name)
        IF ( position > 0 )  THEN
           base_name = base_name(1:position-1)
        ELSE
@@ -2100,7 +2100,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
        time_bounds_num_attributes = 1
        allocate(time_bounds_attributes(1))
        time_bounds_attributes(1)%type = NF90_CHAR
-       time_bounds_attributes(1)%len = len_trim(valid_calendar_types(calendar)) 
+       time_bounds_attributes(1)%len = len_trim(valid_calendar_types(calendar))
        time_bounds_attributes(1)%name = 'calendar'
        time_bounds_attributes(1)%catt = lowercase(TRIM(valid_calendar_types(calendar)))
        ! CF Compliance requires the unit on the _bnds axis is the same as 'time'
@@ -2172,17 +2172,12 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     CHARACTER(len=20) :: sc !< string of current time (output)
     CHARACTER(len=MAX_NAME_LENGTH) :: filetail
     character(len=2) :: first_fms_percent
-    
+
     format = '("-",i*.*)'
     CALL get_date(current_time, yr1, mo1, dy1, hr1, mi1, sc1)
     len = LEN_TRIM(filename)
-    do i=1,9
-       write(first_fms_percent,"('%',i1)") i 
-       first_percent = INDEX(filename, first_fms_percent)
-       if (first_percent > 0) then
-          exit
-       endif
-    enddo
+    first_percent = find_first_fms_percent(filename(1:len))
+
     filetail = filename(first_percent:len)
     ! compute year string
     position = INDEX(filetail, 'yr')
@@ -2284,6 +2279,26 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     get_time_string = TRIM(yr)//TRIM(mo)//TRIM(dy)//TRIM(hr)//TRIM(mi)//TRIM(sc)
     IF ( LEN_TRIM(get_time_string) > 0 ) get_time_string(1:1) = '.'
   END FUNCTION get_time_string
+
+  !> This function looks for the first occurance of %\d in the filename string
+  !! where \d is a digit 1-9.   This allows for other use of the % sign in the filename
+  !! as long as it is not followed by a digit.
+  !! @return the index of the first occurance of %\d in filename.
+  integer function find_first_fms_percent(filename)
+    character(len=*), intent(in) :: filename
+    character(len=2) :: first_fms_percent
+    integer :: i
+
+    do i=1,9
+       write(first_fms_percent,"('%',i1)") i
+       find_first_fms_percent = INDEX(filename, first_fms_percent)
+       if (find_first_fms_percent > 0) then
+          exit
+       endif
+    enddo
+
+  end function find_first_fms_percent
+
 
   !> @brief Return the difference between two times in units.
   !! @return Real get_data_dif

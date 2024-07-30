@@ -66,7 +66,7 @@ use platform_mod
   ! Specify storage limits for fixed size tables used for pointers, etc.
   INTEGER, PARAMETER :: MAX_NAME_LENGTH=256
   INTEGER, PARAMETER :: MAX_FILENAME_LENGTH=512
-  
+
   INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 300 !< Maximum number of fields per file.
   INTEGER, PARAMETER :: DIAG_OTHER = 0
   INTEGER, PARAMETER :: DIAG_OCEAN = 1
