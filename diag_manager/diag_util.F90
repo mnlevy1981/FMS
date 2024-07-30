@@ -2288,15 +2288,22 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     character(len=*), intent(in) :: filename
     character(len=2) :: first_fms_percent
     integer :: i
-
-    do i=1,9
-       write(first_fms_percent,"('%',i1)") i
-       find_first_fms_percent = INDEX(filename, first_fms_percent)
-       if (find_first_fms_percent > 0) then
-          exit
+    integer :: first_percent
+    integer :: first_percent_loc
+    
+    first_percent = INDEX(filename, '%1')
+    do i=2,9
+       write(first_fms_percent,"('%',i1)") i 
+       first_percent_loc = INDEX(filename, first_fms_percent)
+       if (first_percent_loc > 0) then
+          if (first_percent == 0) then
+             first_percent = first_percent_loc
+          else
+             first_percent = min(first_percent, first_percent_loc)
+          endif
        endif
     enddo
-
+    find_first_fms_percent = first_percent
   end function find_first_fms_percent
 
 
