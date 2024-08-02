@@ -64,7 +64,7 @@ use platform_mod
   PUBLIC
 
   ! Specify storage limits for fixed size tables used for pointers, etc.
-  INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 300 !< Maximum number of fields per file.
+  INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 500 !< Maximum number of fields per file.
   INTEGER, PARAMETER :: DIAG_OTHER = 0
   INTEGER, PARAMETER :: DIAG_OCEAN = 1
   INTEGER, PARAMETER :: DIAG_ALL   = 2

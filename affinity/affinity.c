@@ -48,7 +48,7 @@
  * gettid function for systems that do not have this function (e.g. on Mac OS.)
  */
 #ifndef HAVE_GETTID
-static pid_t gettid(void)
+pid_t gettid(void)
 {
 #if defined(__APPLE__)
   uint64_t tid64;
