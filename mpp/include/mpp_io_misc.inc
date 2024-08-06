@@ -142,7 +142,7 @@
 !external handles to netCDF units are saved from maxunits+1:2*maxunits
 !starts at NULLUNIT=-1, used by non-participant PEs in single-threaded I/O
 ! Mofified to allow negative unit numbers as returned from the newunit method.
-      allocate( mpp_file(-maxunits:2*maxunits) ) 
+      allocate( mpp_file(-maxunits:2*maxunits) )
       mpp_file(:)%name   = ' '
       mpp_file(:)%action    = -1
       mpp_file(:)%format    = -1

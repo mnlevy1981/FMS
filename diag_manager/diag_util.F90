@@ -50,7 +50,7 @@ use,intrinsic :: iso_c_binding, only: c_double,c_float,c_int64_t, &
        & debug_diag_manager, flush_nc_files, output_field_type, max_field_attributes, max_file_attributes,&
        & file_type, prepend_date, region_out_use_alt_value, GLO_REG_VAL, GLO_REG_VAL_ALT,&
        & DIAG_FIELD_NOT_FOUND, diag_init_time, diag_atttype
-  USE diag_data_mod, ONLY: fileobjU, fileobj, fnum_for_domain, fileobjND
+  USE diag_data_mod, ONLY: fileobjU, fileobj, fnum_for_domain, fileobjND, MAX_NAME_LENGTH, MAX_FILENAME_LENGTH
   USE diag_axis_mod, ONLY: get_diag_axis_data, get_axis_global_length, get_diag_axis_cart,&
        & get_domain1d, get_domain2d, diag_subaxes_init, diag_axis_init, get_diag_axis, get_axis_aux,&
        & get_axes_shift, get_diag_axis_name, get_diag_axis_domain_name, get_domainUG, &
@@ -152,11 +152,11 @@ CONTAINS
     REAL, ALLOCATABLE :: subaxis_x(:) !< containing local coordinates in x,y,z axes
     REAL, ALLOCATABLE :: subaxis_y(:) !< containing local coordinates in x,y,z axes
     REAL, ALLOCATABLE :: subaxis_z(:) !< containing local coordinates in x,y,z axes
-    CHARACTER(len=128) :: msg
+    CHARACTER(len=MAX_NAME_LENGTH) :: msg
     INTEGER :: ishift, jshift
     INTEGER :: grv !< Value used to determine if the region defined in the diag_table is for the whole
                    !! axis, or a sub-axis
-    CHARACTER(len=128), DIMENSION(2) :: axis_domain_name
+    CHARACTER(len=MAX_NAME_LENGTH), DIMENSION(2) :: axis_domain_name
 
     !initilization for local output
     ! initially out of (lat/lon/depth) range
@@ -429,7 +429,7 @@ CONTAINS
     INTEGER, DIMENSION(3) :: gstart_indx !< global start and end indices of output domain in 3 axes
     INTEGER, DIMENSION(3) :: gend_indx !< global start and end indices of output domain in 3 axes
     CHARACTER(len=1) :: cart
-    CHARACTER(len=128) :: msg
+    CHARACTER(len=MAX_NAME_LENGTH) :: msg
 !----------
 !ug support
     integer :: vert_dim_num
@@ -648,13 +648,13 @@ CONTAINS
     LOGICAL, OPTIONAL, INTENT(in) :: dynamic !< <TT>.TRUE.</TT> if field is not static.
 
     ! ---- local vars
-    CHARACTER(len=256) :: lmodule, lfield, lname, lunits
+    CHARACTER(len=MAX_FILENAME_LENGTH) :: lmodule, lfield, lname, lunits
     CHARACTER(len=64)  :: lmissval, lmin, lmax
     CHARACTER(len=8)   :: numaxis, timeaxis
     INTEGER :: i
     REAL :: missing_value_use !< Local copy of missing_value
     REAL, DIMENSION(2) :: range_use !< Local copy of range
-    CHARACTER(len=256) :: axis_name, axes_list
+    CHARACTER(len=MAX_FILENAME_LENGTH) :: axis_name, axes_list
 
     IF ( .NOT.do_diag_field_log ) RETURN
     IF ( mpp_pe().NE.mpp_root_pe() ) RETURN
@@ -848,7 +848,7 @@ SUBROUTINE check_out_of_bounds(out_num, diag_field_id, err_msg)
   CHARACTER(len=*), INTENT(out) :: err_msg !< Return status of <TT>check_out_of_bounds</TT>.  An empty
                                            !! error string indicates the x, y, and z indices are not outside the
 
-  CHARACTER(len=128) :: error_string1, error_string2
+  CHARACTER(len=MAX_NAME_LENGTH) :: error_string1, error_string2
   LOGICAL :: out_of_bounds = .true.
   TYPE (fmsDiagIbounds_type) :: array_bounds
   associate (buff_bounds => output_fields(out_num)%buff_bounds)
@@ -882,7 +882,7 @@ SUBROUTINE fms_diag_check_out_of_bounds_r4(ofb, bounds, output_name, module_name
   CHARACTER(len=*), INTENT(inout) :: err_msg !< Return status of <TT>check_out_of_bounds</TT>.  An empty
                                            !! error string indicates the x, y, and z indices are not outside the
 
-  CHARACTER(len=128) :: error_string1, error_string2
+  CHARACTER(len=MAX_NAME_LENGTH) :: error_string1, error_string2
   LOGICAL :: out_of_bounds = .true.
   TYPE (fmsDiagIbounds_type) :: array_bounds
 
@@ -914,7 +914,7 @@ SUBROUTINE fms_diag_check_out_of_bounds_r8(ofb, bounds, output_name, module_name
   CHARACTER(len=*), INTENT(out) :: err_msg !< Return status of <TT>check_out_of_bounds</TT>.  An empty
                                            !! error string indicates the x, y, and z indices are not outside the
 
-  CHARACTER(len=128) :: error_string1, error_string2
+  CHARACTER(len=MAX_NAME_LENGTH) :: error_string1, error_string2
   LOGICAL :: out_of_bounds = .true.
   TYPE (fmsDiagIbounds_type) :: array_bounds  !<A bounding box holdstore the current bounds ofb
 
@@ -954,7 +954,7 @@ SUBROUTINE fms_diag_check_bounds_are_exact_dynamic(current_bounds, bounds, outpu
   !! An empty error string indicates the x, y, and z indices are
   !!     equal to the buffer array boundaries.
 
-  CHARACTER(len=128) :: error_string1, error_string2
+  CHARACTER(len=MAX_NAME_LENGTH) :: error_string1, error_string2
   LOGICAL :: do_check
   LOGICAL :: lims_not_exact
 
@@ -1048,7 +1048,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     CHARACTER(len=*), INTENT(out) :: err_msg !< The return status, which is set to non-empty message
                                                !! if the check fails.
 
-    CHARACTER(len=128)  :: error_string1, error_string2
+    CHARACTER(len=MAX_NAME_LENGTH)  :: error_string1, error_string2
     LOGICAL :: lims_not_exact
 
     err_msg = ''
@@ -1086,7 +1086,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
                              !! previously been registered, this new file
                              !! contained differences from the previous.
     REAL, DIMENSION(1) :: tdata
-    CHARACTER(len=128) :: time_units_str
+    CHARACTER(len=MAX_NAME_LENGTH) :: time_units_str
 
     ! Check if this file has already been defined
     same_file_err=.FALSE. ! To indicate that if this file was previously defined
@@ -1249,7 +1249,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     TYPE(time_type), INTENT(in) :: init_time !< Initial time use for the synchronization.
     CHARACTER(len=*), OPTIONAL, INTENT(out) :: err_msg !< Return error message
 
-    CHARACTER(len=128) :: msg
+    CHARACTER(len=MAX_NAME_LENGTH) :: msg
 
     IF ( PRESENT(err_msg) ) err_msg = ''
 
@@ -1281,7 +1281,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
                                                        !! An empty string indicates the next output
                                                        !! time was found successfully.
 
-    CHARACTER(len=128) :: error_message_local
+    CHARACTER(len=MAX_NAME_LENGTH) :: error_message_local
 
     IF ( PRESENT(err_msg) ) err_msg = ''
     error_message_local = ''
@@ -1430,9 +1430,9 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     REAL :: pow_value
     INTEGER :: grv !< Value used to determine if the region defined in the diag_table is for the whole
                    !! axis, or a sub-axis
-    CHARACTER(len=128) :: error_msg
+    CHARACTER(len=MAX_NAME_LENGTH) :: error_msg
     CHARACTER(len=50) :: t_method
-    character(len=256) :: tmp_name
+    character(len=MAX_FILENAME_LENGTH) :: tmp_name
 
     ! Value to use to determine if a region is to be output on the full axis, or sub-axis
     ! get the value to compare to determine if writing full axis data
@@ -1726,10 +1726,10 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     INTEGER, ALLOCATABLE  :: axesc(:) ! indices if compressed axes associated with the field
     LOGICAL :: time_ops, aux_present, match_aux_name, req_present, match_req_fields
     CHARACTER(len=7) :: avg_name = 'average'
-    CHARACTER(len=128) :: time_units, timeb_units, avg, error_string, filename, aux_name, req_fields, fieldname
-    CHARACTER(len=128) :: suffix, base_name
+    CHARACTER(len=MAX_NAME_LENGTH) :: time_units, timeb_units, avg, error_string, filename, aux_name, req_fields, fieldname
+    CHARACTER(len=MAX_NAME_LENGTH) :: suffix, base_name
     CHARACTER(len=32) :: time_name, timeb_name,time_longname, timeb_longname, cart_name
-    CHARACTER(len=256) :: fname
+    CHARACTER(len=MAX_FILENAME_LENGTH) :: fname
     CHARACTER(len=24) :: start_date
     TYPE(domain1d) :: domain
     TYPE(domain2d) :: domain2
@@ -1752,7 +1752,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
 11  FORMAT(A, ' since ', I4.4, '-', I2.2, '-', I2.2, ' ', I2.2, ':', I2.2, ':', I2.2)
     base_name = files(file)%name
     IF ( files(file)%new_file_freq < VERY_LARGE_FILE_FREQ ) THEN
-       position = INDEX(files(file)%name, '%')
+       position = find_first_fms_percent(files(file)%name)
        IF ( position > 0 )  THEN
           base_name = base_name(1:position-1)
        ELSE
@@ -2100,7 +2100,7 @@ END SUBROUTINE check_bounds_are_exact_dynamic
        time_bounds_num_attributes = 1
        allocate(time_bounds_attributes(1))
        time_bounds_attributes(1)%type = NF90_CHAR
-       time_bounds_attributes(1)%len = len_trim(valid_calendar_types(calendar)) 
+       time_bounds_attributes(1)%len = len_trim(valid_calendar_types(calendar))
        time_bounds_attributes(1)%name = 'calendar'
        time_bounds_attributes(1)%catt = lowercase(TRIM(valid_calendar_types(calendar)))
        ! CF Compliance requires the unit on the _bnds axis is the same as 'time'
@@ -2137,9 +2137,9 @@ END SUBROUTINE check_bounds_are_exact_dynamic
 
   !> @brief This function determines a string based on current time.
   !!     This string is used as suffix in output file name
-  !! @return Character(len=128) get_time_string
-  CHARACTER(len=128) FUNCTION get_time_string(filename, current_time)
-    CHARACTER(len=128), INTENT(in) :: filename !< File name.
+  !! @return Character(len=MAX_NAME_LENGTH) get_time_string
+  CHARACTER(len=MAX_NAME_LENGTH) FUNCTION get_time_string(filename, current_time)
+    CHARACTER(len=MAX_NAME_LENGTH), INTENT(in) :: filename !< File name.
     TYPE(time_type), INTENT(in) :: current_time !< Current model time.
 
     INTEGER :: yr1 !< get from current time
@@ -2170,12 +2170,14 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     CHARACTER(len=20) :: hr !< string of current time (output)
     CHARACTER(len=20) :: mi !< string of current time (output)
     CHARACTER(len=20) :: sc !< string of current time (output)
-    CHARACTER(len=128) :: filetail
+    CHARACTER(len=MAX_NAME_LENGTH) :: filetail
+    character(len=2) :: first_fms_percent
 
     format = '("-",i*.*)'
     CALL get_date(current_time, yr1, mo1, dy1, hr1, mi1, sc1)
     len = LEN_TRIM(filename)
-    first_percent = INDEX(filename, '%')
+    first_percent = find_first_fms_percent(filename(1:len))
+
     filetail = filename(first_percent:len)
     ! compute year string
     position = INDEX(filetail, 'yr')
@@ -2277,6 +2279,33 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     get_time_string = TRIM(yr)//TRIM(mo)//TRIM(dy)//TRIM(hr)//TRIM(mi)//TRIM(sc)
     IF ( LEN_TRIM(get_time_string) > 0 ) get_time_string(1:1) = '.'
   END FUNCTION get_time_string
+
+  !> This function looks for the first occurance of %\d in the filename string
+  !! where \d is a digit 1-9.   This allows for other use of the % sign in the filename
+  !! as long as it is not followed by a digit.
+  !! @return the index of the first occurance of %\d in filename.
+  integer function find_first_fms_percent(filename)
+    character(len=*), intent(in) :: filename
+    character(len=2) :: first_fms_percent
+    integer :: i
+    integer :: first_percent
+    integer :: first_percent_loc
+    
+    first_percent = INDEX(filename, '%1')
+    do i=2,9
+       write(first_fms_percent,"('%',i1)") i 
+       first_percent_loc = INDEX(filename, first_fms_percent)
+       if (first_percent_loc > 0) then
+          if (first_percent == 0) then
+             first_percent = first_percent_loc
+          else
+             first_percent = min(first_percent, first_percent_loc)
+          endif
+       endif
+    enddo
+    find_first_fms_percent = first_percent
+  end function find_first_fms_percent
+
 
   !> @brief Return the difference between two times in units.
   !! @return Real get_data_dif
@@ -2511,8 +2540,8 @@ END SUBROUTINE check_bounds_are_exact_dynamic
     CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg !< Error message.  If empty, then no duplicates found.
 
     INTEGER :: i, j, tmp_file
-    CHARACTER(len=128) :: tmp_name
-    CHARACTER(len=256) :: err_msg_local
+    CHARACTER(len=MAX_NAME_LENGTH) :: tmp_name
+    CHARACTER(len=MAX_FILENAME_LENGTH) :: err_msg_local
 
     IF ( PRESENT(err_msg) ) err_msg=''
     ! Do the checking when more than 1 output_fileds present
