@@ -64,6 +64,9 @@ use platform_mod
   PUBLIC
 
   ! Specify storage limits for fixed size tables used for pointers, etc.
+  INTEGER, PARAMETER :: MAX_NAME_LENGTH=256
+  INTEGER, PARAMETER :: MAX_FILENAME_LENGTH=512
+
   INTEGER, PARAMETER :: MAX_FIELDS_PER_FILE = 500 !< Maximum number of fields per file.
   INTEGER, PARAMETER :: DIAG_OTHER = 0
   INTEGER, PARAMETER :: DIAG_OCEAN = 1
@@ -102,7 +105,7 @@ use platform_mod
      REAL :: miss, miss_pack
      LOGICAL :: miss_present, miss_pack_present
      INTEGER :: tile_count
-     character(len=128)      :: fieldname !< Fieldname
+     character(len=MAX_NAME_LENGTH)      :: fieldname !< Fieldname
   END TYPE diag_fieldtype
 
   !> @brief Attribute type for diagnostic fields
@@ -111,7 +114,7 @@ use platform_mod
      INTEGER             :: type !< Data type of attribute values (NF_INT, NF_FLOAT, NF_CHAR)
      INTEGER             :: len !< Number of values in attribute, or if a character string then
                                 !! length of the string.
-     CHARACTER(len=128)  :: name !< Name of the attribute
+     CHARACTER(len=MAX_NAME_LENGTH)  :: name !< Name of the attribute
      CHARACTER(len=1280) :: catt !< Character string to hold character value of attribute
      REAL, allocatable, DIMENSION(:)    :: fatt !< REAL array to hold value of REAL attributes
      INTEGER, allocatable, DIMENSION(:) :: iatt !< INTEGER array to hold value of INTEGER attributes
@@ -133,8 +136,8 @@ use platform_mod
   !> @brief Type to define the diagnostic files that will be written as defined by the diagnostic table.
   !> @ingroup diag_data_mod
   TYPE file_type
-     CHARACTER(len=128) :: name !< Name of the output file.
-     CHARACTER(len=128) :: long_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: name !< Name of the output file.
+     CHARACTER(len=MAX_NAME_LENGTH) :: long_name
      INTEGER, DIMENSION(max_fields_per_file) :: fields
      INTEGER :: num_fields
      INTEGER :: output_freq
@@ -173,8 +176,8 @@ use platform_mod
   !> @brief Type to hold the input field description
   !> @ingroup diag_data_mod
   TYPE input_field_type
-     CHARACTER(len=128) :: module_name, field_name, long_name, units
-     CHARACTER(len=256) :: standard_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: module_name, field_name, long_name, units
+     CHARACTER(len=MAX_FILENAME_LENGTH) :: standard_name
      CHARACTER(len=64) :: interp_method
      INTEGER, DIMENSION(3) :: axes
      INTEGER :: num_axes
@@ -202,7 +205,7 @@ use platform_mod
   TYPE output_field_type
      INTEGER :: input_field !< index of the corresponding input field in the table
      INTEGER :: output_file !< index of the output file in the table
-     CHARACTER(len=128) :: output_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: output_name
      LOGICAL :: time_average !< true if the output field is averaged over time interval
      LOGICAL :: time_rms !< true if the output field is the rms.  If true, then time_average is also
      LOGICAL :: static
@@ -257,19 +260,19 @@ use platform_mod
   !> @brief Type to hold the diagnostic axis description.
   !> @ingroup diag_data_mod
   TYPE diag_axis_type
-     CHARACTER(len=128) :: name
-     CHARACTER(len=256) :: units, long_name
+     CHARACTER(len=MAX_NAME_LENGTH) :: name
+     CHARACTER(len=MAX_FILENAME_LENGTH) :: units, long_name
      CHARACTER(len=1) :: cart_name
      REAL, DIMENSION(:), POINTER :: data
      INTEGER, DIMENSION(MAX_SUBAXES) :: start
      INTEGER, DIMENSION(MAX_SUBAXES) :: end
-     CHARACTER(len=128), DIMENSION(MAX_SUBAXES) :: subaxis_name
+     CHARACTER(len=MAX_NAME_LENGTH), DIMENSION(MAX_SUBAXES) :: subaxis_name
      INTEGER :: length, direction, edges, set, shift
      TYPE(domain1d) :: Domain
      TYPE(domain2d) :: Domain2
      TYPE(domain2d), dimension(MAX_SUBAXES) :: subaxis_domain2
      type(domainUG) :: DomainUG
-     CHARACTER(len=128) :: aux, req
+     CHARACTER(len=MAX_NAME_LENGTH) :: aux, req
      INTEGER :: tile_count
      TYPE(diag_atttype), allocatable, dimension(:) :: attributes !< Array to hold user definable attributes
      INTEGER :: num_attributes !< Number of defined attibutes
@@ -278,8 +281,8 @@ use platform_mod
 
   !> @ingroup diag_data_mod
   TYPE diag_global_att_type
-     CHARACTER(len=128)   :: grid_type='regular'
-     CHARACTER(len=128)   :: tile_name='N/A'
+     CHARACTER(len=MAX_NAME_LENGTH)   :: grid_type='regular'
+     CHARACTER(len=MAX_NAME_LENGTH)   :: tile_name='N/A'
   END TYPE diag_global_att_type
 
 ! Include variable "version" to be written to log file.
@@ -354,7 +357,7 @@ use platform_mod
                                     !! diag_manager_init call, then same as base_time
   TYPE(time_type) :: base_time
   INTEGER :: base_year, base_month, base_day, base_hour, base_minute, base_second
-  CHARACTER(len = 256):: global_descriptor
+  CHARACTER(len = MAX_FILENAME_LENGTH):: global_descriptor
 
   ! <!-- ALLOCATABLE variables -->
   TYPE(file_type), SAVE, ALLOCATABLE :: files(:)
